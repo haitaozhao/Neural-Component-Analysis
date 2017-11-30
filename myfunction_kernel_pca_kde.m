@@ -2,17 +2,6 @@ tic
 
 close;
 clear all;
-%X=importdata('cstr_d00.mat');
-%XT=importdata('cstr_d07.mat');
-% X01=importdata('cstr2_mode1.mat');
-% X02=importdata('cstr2_mode2.mat');
-% X=[X01;X02];
-% XT=importdata('cstr2_d01.mat');
-
-% d00=importdata('cstr1_d00m.mat');
-% X=[d00(201:700,:)];
-% % X=[d00(1:700,:);d00(801:1500,:)];
-% XT=importdata('cstr1_d02.mat');
 
  happen=160;
  d00=importdata('d00.dat');
@@ -20,27 +9,8 @@ clear all;
  X=d00';
  XT=d08;
 [X,mean1,std1]=zscore(X);
-XT=(XT-ones(size(XT,1),1)*mean1)./(ones(size(XT,1),1)*std1);%ĞÂµÄ¹ÊÕÏÊı¾İ¼¯ÔÚ±ê×¼»¯Ê±×÷Îª¼õÊıµÄ¾ùÖµºÍ×÷Îª³ıÊıµÄ±ê×¼²î¶¼È¡×ÔÑµÁ·¼¯
+XT=(XT-ones(size(XT,1),1)*mean1)./(ones(size(XT,1),1)*std1);
 
-%% used for pca %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Êı¾İÔ¤´¦Àí£¬²¢·µ»ØÑµÁ·¼¯µÄ¾ùÖµºÍ±ê×¼²î
-% [COEFF, SCORE, LATENT] = princomp(X); %LATENT is the eigenvalues of the covariance matrix of X, COEFF is the loadings, SCORE is the principal component scores, TSQUARED is the Hotelling's T-squared statistic for each observation in X.
-% percent = 0.85; %input('È·¶¨·½²î¹±Ï×ÂÊÏŞ(0¡«1£©£º')       %the predetermined contribution rate, usually 85%
-% beta=0.99;      %input('È·¶¨Í³¼ÆãĞÖµÖÃĞÅ¶È(0¡«1£©£º')    %beta is the inspection level
-% k=0;
-% for i=1:size(LATENT,1)      %¸ù¾İ·½²î¹±Ï×ÂÊÈ·¶¨Ö÷Ôª¸öÊık£¨ÓëµÚi¸ö¸ººÉÏòÁ¿Ïà¹ØÁªµÄ·½²îµÈÓÚ¶ÔÓ¦µÄÌØÕ÷Öµ£©£» %% choose first k principal components
-%     alpha(i)=sum(LATENT(1:i))/sum(LATENT);
-%     if alpha(i)>=percent  
-%         k=i;
-%         break;  
-%     end 
-% end
-% % Residuals=pcares(X,k);        %ÑµÁ·¼¯µÄ²Ğ²î¿Õ¼ä¾ØÕó
-% P=COEFF(:,1:k);               %PÎª¸ººÉ¾ØÕó
-% % TX=X*P;
-% % TXT=XT*P;
-% %¼ÆËãt2,SPEÍ³¼ÆÁ¿
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Kernel PCA
 percent = 0.85;
@@ -57,7 +27,7 @@ Ktest = constructKernel(X,X,options);
 TKtest = constructKernel(XT,X,options);
 
 k=0;
-for i=1:size(LATENT,1)      %¸ù¾İ·½²î¹±Ï×ÂÊÈ·¶¨Ö÷Ôª¸öÊık£¨ÓëµÚi¸ö¸ººÉÏòÁ¿Ïà¹ØÁªµÄ·½²îµÈÓÚ¶ÔÓ¦µÄÌØÕ÷Öµ£©£» %% choose first k principal components
+for i=1:size(LATENT,1)     
     alpha(i)=sum(LATENT(1:i))/sum(LATENT);
     if alpha(i)>=percent  
         k=i;
@@ -66,19 +36,13 @@ for i=1:size(LATENT,1)      %¸ù¾İ·½²î¹±Ï×ÂÊÈ·¶¨Ö÷Ôª¸öÊık£¨ÓëµÚi¸ö¸ººÉÏòÁ¿Ïà¹ØÁªµ
 end
 P = EVC(:,1:k);
 for i=1:size(Ktest,1)
-    t2(i)=Ktest(i,:)*P*inv(diag(LATENT(1:k)))*P'*Ktest(i,:)'; %¼ÆËãt2Í³¼ÆÁ¿   
+    t2(i)=Ktest(i,:)*P*inv(diag(LATENT(1:k)))*P'*Ktest(i,:)';  
     SPE(i)=Ktest(i,:)*Ktest(i,:)'-Ktest(i,:)*P*(Ktest(i,:)*P)';
-    SPE(i)= norm(Ktest(i,:)-Ktest(i,:)*P*P')^2; % Ktest(i,:)*Ktest(i,:)'-Ktest(i,:)*P*(Ktest(i,:)*P)';
+    SPE(i)= norm(Ktest(i,:)-Ktest(i,:)*P*P')^2; 
 end
-% %t2Í³¼ÆÁ¿µÄ¿ØÖÆÏŞ
-% T2knbeta=k*(size(X,1)-1)*(size(X,1)+1)/(size(X,1)-k)/size(X,1)*finv(beta,k,(size(X,1)-k)); %t2Í³¼ÆÁ¿µÄ¿ØÖÆÏŞ
-% %speÍ³¼ÆÁ¿µÄ¿ØÖÆÏŞ
-% a=sum(SPE)/size(SPE,2);
-% b=var(SPE);
-% SPEbeta=b/(2*a)*chi2inv(beta,2*a^2/b);
-% %¼ÆËã¹ÊÕÏÊı¾İµÄt2,SPEÍ³¼ÆÁ¿
+
 for i=1:size(TKtest,1)
-    XTt2(i)=TKtest(i,:)*P*inv(diag(LATENT(1:k)))*P'*TKtest(i,:)'; %¼ÆËãt2Í³¼ÆÁ¿   
+    XTt2(i)=TKtest(i,:)*P*inv(diag(LATENT(1:k)))*P'*TKtest(i,:)'; 
     XTSPE(i)=TKtest(i,:)*TKtest(i,:)'-TKtest(i,:)*P*(TKtest(i,:)*P)';
     XTSPE(i)= norm(TKtest(i,:)-TKtest(i,:)*P*P')^2;
 end

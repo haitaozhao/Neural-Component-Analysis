@@ -2,17 +2,7 @@ tic
 
 close;
 clear all;
-%X=importdata('cstr_d00.mat');
-%XT=importdata('cstr_d07.mat');
-% X01=importdata('cstr2_mode1.mat');
-% X02=importdata('cstr2_mode2.mat');
-% X=[X01;X02];
-% XT=importdata('cstr2_d01.mat');
 
-% d00=importdata('cstr1_d00m.mat');
-% X=[d00(201:700,:)];
-% % X=[d00(1:700,:);d00(801:1500,:)];
-% XT=importdata('cstr1_d02.mat');
 
  happen=160;
  d00=importdata('d00.dat');
@@ -20,13 +10,13 @@ clear all;
  X=d00';
  XT=d08;
 [X,mean,std]=zscore(X);
-XT=(XT-ones(size(XT,1),1)*mean)./(ones(size(XT,1),1)*std);%ÐÂµÄ¹ÊÕÏÊý¾Ý¼¯ÔÚ±ê×¼»¯Ê±×÷Îª¼õÊýµÄ¾ùÖµºÍ×÷Îª³ýÊýµÄ±ê×¼²î¶¼È¡×ÔÑµÁ·¼¯
-%Êý¾ÝÔ¤´¦Àí£¬²¢·µ»ØÑµÁ·¼¯µÄ¾ùÖµºÍ±ê×¼²î
-[COEFF, SCORE, LATENT] = princomp(X); %LATENT is the eigenvalues of the covariance matrix of X, COEFF is the loadings, SCORE is the principal component scores, TSQUARED is the Hotelling's T-squared statistic for each observation in X.
-percent = 0.85; %input('È·¶¨·½²î¹±Ï×ÂÊÏÞ(0¡«1£©£º')       %the predetermined contribution rate, usually 85%
-beta=0.99;      %input('È·¶¨Í³¼ÆãÐÖµÖÃÐÅ¶È(0¡«1£©£º')    %beta is the inspection level
+XT=(XT-ones(size(XT,1),1)*mean)./(ones(size(XT,1),1)*std);
+
+[COEFF, SCORE, LATENT] = princomp(X);
+percent = 0.85;
+beta=0.99;   
 k=0;
-for i=1:size(LATENT,1)      %¸ù¾Ý·½²î¹±Ï×ÂÊÈ·¶¨Ö÷Ôª¸öÊýk£¨ÓëµÚi¸ö¸ººÉÏòÁ¿Ïà¹ØÁªµÄ·½²îµÈÓÚ¶ÔÓ¦µÄÌØÕ÷Öµ£©£» %% choose first k principal components
+for i=1:size(LATENT,1)    
     alpha(i)=sum(LATENT(1:i))/sum(LATENT);
     if alpha(i)>=percent  
         k=i;
@@ -34,22 +24,13 @@ for i=1:size(LATENT,1)      %¸ù¾Ý·½²î¹±Ï×ÂÊÈ·¶¨Ö÷Ôª¸öÊýk£¨ÓëµÚi¸ö¸ººÉÏòÁ¿Ïà¹ØÁªµ
     end 
 end
 
-% Residuals=pcares(X,k);        %ÑµÁ·¼¯µÄ²Ð²î¿Õ¼ä¾ØÕó
-P=COEFF(:,1:k);               %PÎª¸ººÉ¾ØÕó
-% TX=X*P;
-% TXT=XT*P;
-%¼ÆËãt2,SPEÍ³¼ÆÁ¿
+P=COEFF(:,1:k);          
+
 for i=1:size(X,1)
-    t2(i)=X(i,:)*P*inv(diag(LATENT(1:k)))*P'*X(i,:)'; %¼ÆËãt2Í³¼ÆÁ¿   
+    t2(i)=X(i,:)*P*inv(diag(LATENT(1:k)))*P'*X(i,:)';   
     SPE(i)=X(i,:)*COEFF*(X(i,:)*COEFF)'-X(i,:)*P*(X(i,:)*P)';
 end
-%t2Í³¼ÆÁ¿µÄ¿ØÖÆÏÞ
-T2knbeta=k*(size(X,1)-1)*(size(X,1)+1)/(size(X,1)-k)/size(X,1)*finv(beta,k,(size(X,1)-k)); %t2Í³¼ÆÁ¿µÄ¿ØÖÆÏÞ
-%speÍ³¼ÆÁ¿µÄ¿ØÖÆÏÞ
-a=sum(SPE)/size(SPE,2);
-b=var(SPE);
-SPEbeta=b/(2*a)*chi2inv(beta,2*a^2/b);
-%¼ÆËã¹ÊÕÏÊý¾ÝµÄt2,SPEÍ³¼ÆÁ¿
+
 for i=1:size(XT,1);
     XTt2(i)=XT(i,:)*P*inv(diag(LATENT(1:k)))*P'*XT(i,:)';
     XTSPE(i)=XT(i,:)*COEFF*(XT(i,:)*COEFF)'-XT(i,:)*P*(XT(i,:)*P)';
