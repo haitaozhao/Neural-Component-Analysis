@@ -114,9 +114,9 @@ for wi=happen+1:size(XTt2,2)
 end
 missrate_pca_T2=100*missT2/(size(XTt2,2)-happen);
 missrate_pca_SPE=100*missSPE/(size(XTt2,2)-happen);
- disp('----PCA--False alarm rate----');
+ disp('----KPCA--False alarm rate----');
 falserate_pca=[falserate_pca_T2 falserate_pca_SPE]
- disp('----PCA--Miss alarm rate----');
+ disp('----KPCA--Miss alarm rate----');
 missrate_pca=[missrate_pca_T2 missrate_pca_SPE]
 % toc
 i1=happen+1;
