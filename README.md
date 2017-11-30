@@ -1,5 +1,6 @@
-## Neural Component Analysis for Fault Detection
+# Neural Component Analysis for Fault Detection
 ***
+## 
 
 ### Requirements for runing the code of NCA
 There are serveral python libraries you should install before running the code.
